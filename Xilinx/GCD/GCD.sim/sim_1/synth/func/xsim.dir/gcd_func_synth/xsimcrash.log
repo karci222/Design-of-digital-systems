@@ -1,0 +1,7 @@
+Unable to capture context for thread 14060 in process 11556, can not generate back trace
+Exception at PC 0x00007FFF497EBB93
+Printing stacktrace...
+
+Exception at PC 0x00007FFF494F1A52
+Attemped to write at address 0x00007FFF8671ABA4
+Another exception occurred while writing back trace, hence exiting

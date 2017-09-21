@@ -23,7 +23,11 @@ add wave /testbench/ack
 add wave /testbench/GCD_module/u2/state 
 add wave /testbench/GCD_module/u2/state
 add wave /testbench/environment/current_state 
-add wave /testbench/environment/next_state  
+add wave /testbench/environment/next_state
+add wave /testbench/GCD_module/u2/next_reg_a
+add wave /testbench/GCD_module/u2/reg_a
+add wave /testbench/GCD_module/u2/next_reg_b
+add wave /testbench/GCD_module/u2/reg_b
 
 run 5000ns
 

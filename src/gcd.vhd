@@ -39,12 +39,14 @@ BEGIN
 
 CL: PROCESS (req,AB,state,reg_a,reg_b,reset)
 BEGIN
-
+   next_state <= state;
+   next_reg_a <= reg_a;
+   next_reg_b <= reg_b;
+   ack <= '0';
    CASE (state) IS
 
 		when start =>
-			ack <= '0';
-			if req'event AND req = '1' then
+			if  req = '1' then
 				next_state <= read_A;
 			end if;
 		when read_A =>
@@ -52,16 +54,15 @@ BEGIN
 			ack <= '1';
 			next_state <= idle_a;
 		when idle_A =>
-			if req'event AND req = '0' then
-				ack <= '0';
-			end if;
-
-			if req'event AND req = '1' then
-				next_state <= read_b;
-			end if;
+		    ack <= '1';
+		    if  req = '0' then
+		 	ack <= '0';
+			next_state <= read_b;
+		    end if;
 		when read_b =>
 			next_reg_b <= AB;
-			next_state <= compare;
+               		next_state <= compare;
+			
 		when compare =>
 			if reg_A = reg_B then
 				next_state <= result;
@@ -80,26 +81,26 @@ BEGIN
 			next_state <= compare;
 		when result =>
 			C <= reg_a;
-			ack <= '1';
+			ack <= '1';  
 			next_state <= start;
 
    END CASE;
+   
 END PROCESS CL;
 
 -- Registers
 
 seq: PROCESS (clk, reset)
 BEGIN
-
-   if rising_edge(clk) then	
-	-- on reset clean registers and get to the starting state	
-	if reset'event and reset = '1' then
+   if reset = '1' then
 		state <= start;
-	else
-		state <= next_state;
-		reg_a <= next_reg_a;
-		reg_b <= next_reg_b;
-	end if;
+   elsif rising_edge(clk) then	
+	-- on reset clean registers and get to the starting state	
+	
+	state <= next_state;
+	reg_a <= next_reg_a;
+	reg_b <= next_reg_b;
+
   end if;
 END PROCESS seq;
 
