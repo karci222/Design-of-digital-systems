@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7a100tcsg324-1" LaunchTime="1505988433">
+<GenRun Id="synth_1" LaunchPart="xc7a100tcsg324-1" LaunchTime="1506593167">
   <File Type="RDS-PROPCONSTRS" Name="gcd_drc_synth.rpt"/>
   <File Type="PA-TCL" Name="gcd.tcl"/>
   <File Type="RDS-RDS" Name="gcd.vds"/>

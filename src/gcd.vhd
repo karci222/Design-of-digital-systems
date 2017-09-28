@@ -28,25 +28,29 @@ ARCHITECTURE FSMD OF gcd IS
 
 TYPE state_type IS ( start, read_A,idle_A, read_b,  compare ,A_bigger_than_B, A_smaller_than_B,result ); -- Input your own state names
 
-SIGNAL reg_a,next_reg_a,next_reg_b,reg_b : unsigned(15 downto 0);
+SIGNAL reg_a,next_reg_a,next_reg_b,reg_b, n, next_n : unsigned(15 downto 0);
+
 
 SIGNAL state, next_state : state_type;
+
 
 
 BEGIN
 
 -- Combinatoriel logic
 
-CL: PROCESS (req,AB,state,reg_a,reg_b,reset)
+CL: PROCESS (req,AB,state,reg_a,reg_b,reset, n)
 BEGIN
    next_state <= state;
    next_reg_a <= reg_a;
    next_reg_b <= reg_b;
    ack <= '0';
    C <= reg_b;
+   next_n <= n;
    CASE (state) IS
 
 		when start =>
+		    next_n <= (others => '0');
 			if  req = '1' then
 				next_state <= read_A;
 		    else  
@@ -76,12 +80,22 @@ BEGIN
 		     
 			if reg_A = reg_B then
 			     next_state <= result;
-			else 
-				if reg_A > reg_B then
-				next_state <= A_bigger_than_B;
-				else
-				next_state <= A_smaller_than_B;
-				end if;
+			elsif reg_A(0) = '0' then
+			  next_reg_a <= '0' & reg_A(15 downto 1);
+			  if reg_B(0) = '0' then
+			    next_reg_b <= '0' & reg_B(15 downto 1);
+				next_n <= n + 1;
+			    next_state <= compare;
+			  else
+				next_state <= compare;
+			  end if;
+			elsif reg_B(0) = '0' then 
+			  next_reg_b <= '0' & reg_B(15 downto 1);
+			  next_state <= compare;
+			elsif reg_A > reg_B then
+			  next_state <= A_bigger_than_B;
+			else
+			  next_state <= A_smaller_than_B;
 			end if;
 		when A_bigger_than_B =>
                 next_reg_a <= reg_a - reg_b;
@@ -90,11 +104,16 @@ BEGIN
                 next_reg_b <= reg_b - reg_a;
                 next_state <= compare;
 		when result =>
-                C <= reg_a;
-                ack <= '1'; 
-			if req = '0' then 
-                next_state <= start;
-            end if;
+				if n = 0 then 
+				  ack <= '1';
+                  C <= reg_a;
+				  next_state <= start;
+				else
+				  next_reg_a <=  reg_A(14 downto 0) & '0';
+				  next_n <= n - 1;
+				  next_state <= result;
+				end if;
+				  
    END CASE;
    
 END PROCESS CL;
@@ -107,13 +126,14 @@ BEGIN
             state <= start;
             reg_a <= (others => '0');
             reg_b <= (others => '0');
-            
+            n <= (others => '0');
        elsif rising_edge(clk) then	
 	-- on reset clean registers and get to the starting state	
 	
             state <= next_state;
             reg_a <= next_reg_a;
             reg_b <= next_reg_b;
+			n <= next_n;
 
   end if;
 END PROCESS seq;
